@@ -7,12 +7,10 @@ import java.util.Optional;
 
 public class EmployeeDAO {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/Employee";
+    private static final String URL = "jdbc:mysql://localhost:3306/Employee";
     private static final String USER = "root";
     private static final String PASSWORD = "coral9@wind";
 
-    // 🔹 Get DB Connection
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
@@ -49,6 +47,52 @@ public class EmployeeDAO {
             e.printStackTrace();
         }
     }
+
+    public void updateEmployeeField(int id, String name, Integer salary) {
+
+        StringBuilder sql = new StringBuilder("UPDATE employee SET ");
+        boolean comma = false;
+
+        if (name != null) {
+            sql.append("name = ?");
+            comma = true;
+        }
+
+        if (salary != null) {
+            if (comma) sql.append(", ");
+            sql.append("salary = ?");
+        }
+
+        sql.append(" WHERE id = ?");
+
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (name != null) {
+                ps.setString(index++, name);
+            }
+
+            if (salary != null) {
+                ps.setInt(index++, salary);
+            }
+
+            ps.setInt(index, id);
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("Employee updated successfully.");
+            } else {
+                System.out.println("Employee not found.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public Optional<Employee> findById(int id) {

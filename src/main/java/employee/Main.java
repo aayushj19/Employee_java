@@ -12,7 +12,7 @@ public class Main {
         EmployeeDAO dao = new EmployeeDAO();
 
         while (true) {
-            System.out.println(" 1.Add Employee\n 2.Search Employee by ID\n 3.Get All Employees\n 4.Search Employee by Salary\n 5.Delete an Employee\n 6. Exit");
+            System.out.println(" 1.Add Employee\n 2.Search Employee by ID\n 3.Get All Employees\n 4.Search Employee by Salary\n 5.Update Employee Details\n 6.Delete an Employee\n 7.Exit");
 
             System.out.print("Enter your choice: ");
             int choice = sc.nextInt();
@@ -80,13 +80,48 @@ public class Main {
                     }
                 }
             }
-            else if(choice  == 5){
+            else if(choice == 5){
+                System.out.print("Enter employee ID: ");
+                int id = sc.nextInt();
+
+                System.out.println("What do you want to update?");
+                System.out.println("1. Name");
+                System.out.println("2. Salary");
+                System.out.println("3. Name & Salary");
+
+                int option = sc.nextInt();
+
+                String name = null;
+                Integer salary = null;
+
+                if (option == 1) {
+                    System.out.print("Enter new name: ");
+                    name = sc.next();
+                }
+                else if (option == 2) {
+                    System.out.print("Enter new salary: ");
+                    salary = sc.nextInt();
+                }
+                else if (option == 3) {
+                    System.out.print("Enter new name: ");
+                    name = sc.next();
+                    System.out.print("Enter new salary: ");
+                    salary = sc.nextInt();
+                }
+                else {
+                    System.out.println("Invalid option");
+                }
+
+                dao.updateEmployeeField(id, name, salary);
+
+            }
+            else if(choice  == 6){
                 System.out.print("Enter the Employee Id:");
                 int id = sc.nextInt();
                 dao.deleteEmployee(id);
             }
 
-            else if (choice == 6) {
+            else if (choice == 7) {
                 System.out.println("Thank you!");
                 break;
             }
