@@ -1,5 +1,7 @@
 package employee;
 
+import com.hibernate.util.HibernateUtil;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -12,17 +14,18 @@ public class Main {
         EmployeeDAO dao = new EmployeeDAO();
 
         while (true) {
-            System.out.println(" 1.Add Employee\n 2.Search Employee by ID\n 3.Get All Employees\n 4.Search Employee by Salary\n 5.Update Employee Details\n 6.Delete an Employee\n 7.Exit");
-
+            System.out.println("1.Add Employee \n 2.Search Employee by ID \n 3.Get All Employees \n 4.Search Employee by Salary \n 5.Update Employee Details \n 6.Delete an Employee\n 7.Exit");
             System.out.print("Enter your choice: ");
             int choice = sc.nextInt();
+            sc.nextLine();
 
             if (choice == 1) {
                 System.out.print("Enter Name: ");
-                String name = sc.next();
+                String name = sc.nextLine();
 
                 System.out.print("Enter Salary: ");
                 int salary = sc.nextInt();
+                sc.nextLine();
 
                 Employee emp = new Employee();
                 emp.setName(name);
@@ -30,12 +33,12 @@ public class Main {
 
                 dao.addEmployee(emp);
                 System.out.println("Employee added successfully!");
-
             }
 
             else if (choice == 2) {
                 System.out.print("Enter Employee ID: ");
                 int id = sc.nextInt();
+                sc.nextLine();
 
                 Optional<Employee> empOpt = dao.findById(id);
 
@@ -63,9 +66,11 @@ public class Main {
                     }
                 }
             }
+
             else if (choice == 4) {
                 System.out.print("Enter salary: ");
                 int salary = sc.nextInt();
+                sc.nextLine();
 
                 List<Employee> list = dao.findBySalary(salary);
 
@@ -80,49 +85,42 @@ public class Main {
                     }
                 }
             }
-            else if(choice == 5){
+
+            else if (choice == 5) {
                 System.out.print("Enter employee ID: ");
                 int id = sc.nextInt();
+                sc.nextLine();
 
-                System.out.println("What do you want to update?");
-                System.out.println("1. Name");
-                System.out.println("2. Salary");
-                System.out.println("3. Name & Salary");
-
+                System.out.println("1. Name\n2. Salary\n3. Name & Salary");
                 int option = sc.nextInt();
+                sc.nextLine();
 
                 String name = null;
                 Integer salary = null;
 
-                if (option == 1) {
+                if (option == 1 || option == 3) {
                     System.out.print("Enter new name: ");
-                    name = sc.next();
+                    name = sc.nextLine();
                 }
-                else if (option == 2) {
+                if (option == 2 || option == 3) {
                     System.out.print("Enter new salary: ");
                     salary = sc.nextInt();
-                }
-                else if (option == 3) {
-                    System.out.print("Enter new name: ");
-                    name = sc.next();
-                    System.out.print("Enter new salary: ");
-                    salary = sc.nextInt();
-                }
-                else {
-                    System.out.println("Invalid option");
+                    sc.nextLine();
                 }
 
                 dao.updateEmployeeField(id, name, salary);
-
             }
-            else if(choice  == 6){
-                System.out.print("Enter the Employee Id:");
+
+            else if (choice == 6) {
+                System.out.print("Enter the Employee Id: ");
                 int id = sc.nextInt();
+                sc.nextLine();
                 dao.deleteEmployee(id);
             }
 
             else if (choice == 7) {
                 System.out.println("Thank you!");
+                HibernateUtil.getSessionFactory().close();
                 break;
             }
 

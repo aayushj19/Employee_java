@@ -31,3 +31,5 @@ bin/
 
 # Security: Do not commit environment variables
 .env
+#hibernate config file
+hibernate.cfg.xml

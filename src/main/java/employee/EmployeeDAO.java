@@ -1,173 +1,97 @@
 package employee;
-import java.io.InputStream;
-import java.sql.*;
-import java.util.ArrayList;
+
+import com.hibernate.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
-import io.github.cdimascio.dotenv.Dotenv;
-
 
 public class EmployeeDAO {
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String URL = dotenv.get("DB_URL");
-    private static final String USER = dotenv.get("DB_USER");
-    private static final String PASSWORD = dotenv.get("DB_PASSWORD");
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
-    }
+    //for creating employees
     public void addEmployee(Employee emp) {
-        String sql = "INSERT INTO employee (name, salary) VALUES (?, ?)";
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        session.persist(emp);
 
-            ps.setString(1, emp.getName());
-            ps.setInt(2, emp.getSalary());
-            ps.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        tx.commit();
+        session.close();
     }
+   //for deleting employees
     public void deleteEmployee(int id) {
-        String sql = "DELETE FROM employee WHERE id = ?";
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        Employee emp = session.get(Employee.class, id);
 
-            ps.setInt(1, id);
-            int rows = ps.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("Employee deleted successfully.");
-            } else {
-                System.out.println("Employee not found.");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (emp != null) {
+            session.delete(emp);
+            System.out.println("Employee deleted successfully.");
+        } else {
+            System.out.println("Employee not found.");
         }
+
+        tx.commit();
+        session.close();
     }
 
+    // for updating employee data
     public void updateEmployeeField(int id, String name, Integer salary) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
 
-        StringBuilder sql = new StringBuilder("UPDATE employee SET ");
-        boolean comma = false;
+        Employee emp = session.get(Employee.class, id);
 
-        if (name != null) {
-            sql.append("name = ?");
-            comma = true;
-        }
-
-        if (salary != null) {
-            if (comma) sql.append(", ");
-            sql.append("salary = ?");
-        }
-
-        sql.append(" WHERE id = ?");
-
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-            int index = 1;
-
+        if (emp != null) {
             if (name != null) {
-                ps.setString(index++, name);
+                emp.setName(name);
             }
-
             if (salary != null) {
-                ps.setInt(index++, salary);
+                emp.setSalary(salary);
             }
-
-            ps.setInt(index, id);
-
-            int rows = ps.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("Employee updated successfully.");
-            } else {
-                System.out.println("Employee not found.");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Employee updated successfully.");
+        } else {
+            System.out.println("Employee not found.");
         }
+
+        tx.commit();
+        session.close();
     }
 
-
-
+    // find any employee by id
     public Optional<Employee> findById(int id) {
-        String sql = "SELECT * FROM employee WHERE id = ?";
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        Employee emp = session.get(Employee.class, id);
 
-            ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                Employee emp = new Employee();
-                emp.setId(rs.getInt("id"));
-                emp.setName(rs.getString("name"));
-                emp.setSalary(rs.getInt("salary"));
-                return Optional.of(emp);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+        session.close();
+        return Optional.ofNullable(emp);
     }
 
+    // get all the employee
     public List<Employee> getAllEmployees() {
-        List<Employee> list = new ArrayList<>();
-        String sql = "SELECT * FROM employee";
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        List<Employee> list = session
+                .createQuery("from Employee", Employee.class)
+                .list();
 
-            while (rs.next()) {
-                Employee emp = new Employee();
-                emp.setId(rs.getInt("id"));
-                emp.setName(rs.getString("name"));
-                emp.setSalary(rs.getInt("salary"));
-                list.add(emp);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        session.close();
         return list;
     }
 
+    // find employee by salary
     public List<Employee> findBySalary(int salary) {
-        List<Employee> list = new ArrayList<>();
-        String sql = "SELECT * FROM employee WHERE salary = ?";
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        List<Employee> list = session
+                .createQuery("from Employee where salary = :salary", Employee.class)
+                .setParameter("salary", salary)
+                .list();
 
-            ps.setInt(1, salary);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Employee emp = new Employee();
-                emp.setId(rs.getInt("id"));
-                emp.setName(rs.getString("name"));
-                emp.setSalary(rs.getInt("salary"));
-                list.add(emp);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        session.close();
         return list;
     }
 }
-
